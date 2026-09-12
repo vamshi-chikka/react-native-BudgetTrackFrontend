@@ -1,5 +1,5 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import config from '../config/env';
+import { getSecurePreference, clearSecurePreference } from './userPreference';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 type RequestHeaders = Record<string, string>;
@@ -53,7 +53,7 @@ export const rnRestClient = async <T = any>({
   headers = {},
   requireAuth = true,
 }: RNRestClientOptions): Promise<T> => {
-  const token = requireAuth ? await AsyncStorage.getItem('token') : null;
+  const token = requireAuth ? await getSecurePreference('token') : null;
   const requestHeaders = {
     ...jsonHeaders,
     ...headers,
@@ -75,7 +75,7 @@ export const rnRestClient = async <T = any>({
   const response = await fetch(`${config.API_URL}${endpoint}`, requestInit);
 
   if (response.status === 401) {
-    await AsyncStorage.removeItem('token');
+    await clearSecurePreference('token');
   }
 
   if (!response.ok) {

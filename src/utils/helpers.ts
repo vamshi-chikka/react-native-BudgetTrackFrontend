@@ -2,8 +2,6 @@
  * Common Utilities and Helpers
  */
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
 /**
  * Generic error handler for API calls
  */

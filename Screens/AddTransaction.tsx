@@ -4,8 +4,8 @@ import {StyleSheet,Text, View,TextInput, StatusBar,TouchableOpacity,Alert, Activ
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
 import {TRANSACTION_ENDPOINTS} from '../Constants/api';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CALLAPI } from '../network/RNRestClient';
+import { getSecurePreference } from '../network/userPreference';
 
 export default function AddTransaction(){
     const navigation = useNavigation();
@@ -24,6 +24,7 @@ export default function AddTransaction(){
         { id: "entertainment", name: "Entertainment", icon: "film" },
         { id: "bills", name: "Bills", icon: "receipt" },
         { id: "income", name: "Income", icon: "cash" },
+        { id: "friends", name: "Friends", icon: "people" },
         { id: "other", name: "Other", icon: "ellipsis-horizontal" },
     ];
 
@@ -64,7 +65,7 @@ export default function AddTransaction(){
                 category: category
             };
 
-            const token = await AsyncStorage.getItem('token');
+            const token = await getSecurePreference('token');
             if (!token) {
                 Alert.alert('Error', 'Authentication token not found. Please login again.');
                 return;

@@ -4,7 +4,6 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
 
 import ExpenseCard from '../components/ExpenseCard';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useFocusEffect} from '@react-navigation/native';
 import {TRANSACTION_ENDPOINTS} from '../Constants/api'
 import {NetworkContext} from '../context/NetworkProvider';
@@ -13,6 +12,7 @@ import Logout from '../components/Logout';
 import {useSelector} from 'react-redux';
 import TransactionCard from '../components/TransactionCard';
 import { CALLAPI } from '../network/RNRestClient';
+import { getSecurePreference } from '../network/userPreference';
 
 export default function Transaction(){
     const {isConnected} = useContext(NetworkContext);
@@ -33,7 +33,7 @@ export default function Transaction(){
 
         pageNumber === 1 ? setIsLoading(true) : setIsLoadingMore(true);
         try {
-            const token = await AsyncStorage.getItem('token');
+            const token = await getSecurePreference('token');
             if (!token) {
                 Alert.alert('Error', 'Authentication token not found. Please login again.');
                 return;
@@ -70,7 +70,7 @@ export default function Transaction(){
 
     const deleteTransaction = async (Id: string) => {
         try {
-            const token = await AsyncStorage.getItem('token');
+            const token = await getSecurePreference('token');
             if (!token) {
                 Alert.alert('Error', 'Authentication token not found.');
                 return;
