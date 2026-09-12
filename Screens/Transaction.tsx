@@ -43,18 +43,20 @@ export default function Transaction(){
 
             if (response?.status === 'ok' && response?.data) {
                 const {allData, currentPage, totalPages} = response.data;
+                const nextPage = currentPage || pageNumber;
+
                 setAmountDetails(response.data);
                 setTotalPages(totalPages);
-                setPage(currentPage);
+                setPage(nextPage);
                 setError('');
-                
+
                 if (pageNumber === 1) {
                     setTranDetails(allData);
-                    setHasMore(currentPage < totalPages);
                 } else {
                     setTranDetails(prev => [...prev, ...allData]);
-                    setHasMore(currentPage < totalPages);
                 }
+
+                setHasMore(nextPage < totalPages);
             } else {
                 setError('Failed to fetch transactions');
             }
@@ -180,33 +182,43 @@ export default function Transaction(){
             <Text style={styles.text}>Recent Transactions</Text>
             
             {isLoading ? (
-                <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-                    <ActivityIndicator size="large" color="#4A3428" />
-                </View>
-            ) : (
-                <FlatList
-                    data={tranDetails}
-                    keyExtractor={(item)=>item._id}
-                    renderItem={({item})=>{
-                        return(
-                            <TransactionCard 
-                                item={item}
-                                onDelete={deleteTransaction}
-                            />
-                        )
-                    }}
-                    ListEmptyComponent={
-                        <View style={{justifyContent:'center',alignItems:'center', marginTop: 50}}>
-                            <Text style={{fontSize: 16, color: 'grey'}}>No transactions yet</Text>  
-                        </View>
-                    }
-                    onEndReached={loadMore}
-                    onEndReachedThreshold={0.4}
-                    ListFooterComponent={
-                        isLoadingMore ? <ActivityIndicator size="small" color="#4A3428" style={{marginVertical: 10}} /> : null
-                    }
+    <View style={styles.loaderContainer}>
+        <ActivityIndicator size="large" color="#4A3428" />
+    </View>
+    ) : (
+        <View style={{flex:1, marginBottom: 20}}>
+        <FlatList
+            data={tranDetails}
+            keyExtractor={(item) => item._id}
+            renderItem={({ item }) => (
+                <TransactionCard
+                    item={item}
+                    onDelete={deleteTransaction}
                 />
             )}
+            ListEmptyComponent={
+                <View style={styles.emptyContainer}>
+                    <Text style={styles.emptyText}>
+                        No transactions yet
+                    </Text>
+                </View>
+            }
+            onEndReached={loadMore}
+            onEndReachedThreshold={0.2}
+            contentContainerStyle={styles.listContent}
+            ListFooterComponent={
+                isLoadingMore ? (
+                    <ActivityIndicator
+                        size="small"
+                        color="#4A3428"
+                        style={{ marginVertical: 15 }}
+                    />
+                ) : null
+            }
+            showsVerticalScrollIndicator={true}
+        />
+        </View>
+    )}
         </SafeAreaView>
     )
 }
@@ -248,5 +260,27 @@ const styles = StyleSheet.create({
     errorText:{
         color:'red',
         fontSize:13
-    }
+    },
+    loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    },
+
+    listContent: {
+        paddingBottom: 30,
+        flexGrow: 1,
+    },
+
+    emptyContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 50,
+    },
+
+    emptyText: {
+        fontSize: 16,
+        color: 'grey',
+    },
 })
