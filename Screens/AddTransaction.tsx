@@ -4,7 +4,7 @@ import {StyleSheet,Text, View,TextInput, StatusBar,TouchableOpacity,Alert, Activ
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
 import axios from 'axios';
-import {API_URL} from '../Constants/api';
+import {API_URL, TRANSACTION_ENDPOINTS} from '../Constants/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function AddTransaction(){
@@ -71,7 +71,7 @@ export default function AddTransaction(){
             }
 
             const response = await axios.post(
-                `${API_URL}/api/tran/addtransaction`,
+                `${API_URL}${TRANSACTION_ENDPOINTS.ADD_TRANSACTION}`,
                 transactionData,
                 {
                     headers: {

@@ -4,7 +4,7 @@ import {useNavigation} from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {API_URL} from '../../Constants/api';
+import {API_URL, AUTH_ENDPOINTS} from '../../Constants/api';
 import {useDispatch} from 'react-redux';
 import {userLogin} from '../../redux/userSlice';
 import { NetworkContext } from '../../context/NetworkProvider';
@@ -66,7 +66,7 @@ export default function LoginScreen(){
                 password: password.trim()
             };
             
-            const response = await axios.post(`${API_URL}/api/auth/login`, userData, {
+            const response = await axios.post(`${API_URL}${AUTH_ENDPOINTS.LOGIN}`, userData, {
                 timeout: 10000
             });
 

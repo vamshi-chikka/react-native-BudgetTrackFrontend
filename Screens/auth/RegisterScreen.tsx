@@ -5,7 +5,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
 import * as Yup from 'yup';
 import {Formik} from 'formik';
-import { API_TIMEOUT, API_URL } from '../../Constants/api';
+import { API_TIMEOUT, API_URL, AUTH_ENDPOINTS } from '../../Constants/api';
 
 export default function RegisterScreen(){
     const navigation = useNavigation();
@@ -29,7 +29,7 @@ export default function RegisterScreen(){
                 password: values.password,
             };
             console.log('Registration data:', registrationData);
-            const response = await axios.post(`${API_URL}/api/auth/register`, registrationData, {
+            const response = await axios.post(`${API_URL}${AUTH_ENDPOINTS.REGISTER}`, registrationData, {
                 timeout: API_TIMEOUT
             });
             console.log('Registration response:', response.data);

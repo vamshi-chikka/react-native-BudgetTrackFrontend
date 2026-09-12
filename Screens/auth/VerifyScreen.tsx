@@ -4,7 +4,7 @@ import React, {useState} from 'react';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
 import {useNavigation} from '@react-navigation/native';
-import { API_URL } from '../../Constants/api';
+import { API_URL, AUTH_ENDPOINTS } from '../../Constants/api';
 
 
 
@@ -21,7 +21,7 @@ export default function VerifyScreen({route}){
         }
 
         try {
-            const response = await axios.post(`${API_URL}/api/auth/verifyEmail`, {
+            const response = await axios.post(`${API_URL}${AUTH_ENDPOINTS.VERIFY}`, {
                 email: email.trim().toLowerCase(),
                 otp: trimmedOtp,
             });
