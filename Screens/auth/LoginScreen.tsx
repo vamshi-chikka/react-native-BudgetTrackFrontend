@@ -2,7 +2,6 @@ import React,{useState,useContext} from 'react';
 import {View, Text, StyleSheet,Image, Pressable, TextInput, TouchableOpacity,ScrollView, StatusBar, KeyboardAvoidingView,Platform, Alert, ActivityIndicator} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {AUTH_ENDPOINTS} from '../../Constants/api';
 import {useDispatch} from 'react-redux';
 import {userLogin} from '../../redux/userSlice';
@@ -10,6 +9,7 @@ import { NetworkContext } from '../../context/NetworkProvider';
 import OfflineBanner from '../../components/OfflineBanner';
 import { login } from '../../redux/authSlice';
 import { CALLAPI } from '../../network/RNRestClient';
+import { setSecurePreference } from '../../network/userPreference';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -72,7 +72,7 @@ export default function LoginScreen(){
                 const token = response.data.token;
                 const user = response.data.oldUser;
 
-                await AsyncStorage.setItem('token', token);
+                await setSecurePreference('token', token);
                 dispatch(userLogin({
                     id: user._id,
                     name: user.name,

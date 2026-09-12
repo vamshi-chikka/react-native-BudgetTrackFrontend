@@ -1,17 +1,17 @@
 import React from 'react';
 import { Pressable , StyleSheet, Alert } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useDispatch} from 'react-redux';
 import {userLogout} from '../redux/userSlice';
 import {logout} from '../redux/authSlice';
 import {persistor} from '../redux/store';
+import { clearAllPreferences } from '../network/userPreference';
 
 export default function Logout(){
     const dispatch = useDispatch();
     const handleLogout = async() =>{
         try {
-            await AsyncStorage.removeItem('token');
+            await clearAllPreferences();
             dispatch(userLogout());
             dispatch(logout());
             await persistor.purge();
