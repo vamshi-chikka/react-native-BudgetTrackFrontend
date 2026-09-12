@@ -2,14 +2,14 @@ import React,{useState,useContext} from 'react';
 import {View, Text, StyleSheet,Image, Pressable, TextInput, TouchableOpacity,ScrollView, StatusBar, KeyboardAvoidingView,Platform, Alert, ActivityIndicator} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {API_URL, AUTH_ENDPOINTS} from '../../Constants/api';
+import {AUTH_ENDPOINTS} from '../../Constants/api';
 import {useDispatch} from 'react-redux';
 import {userLogin} from '../../redux/userSlice';
 import { NetworkContext } from '../../context/NetworkProvider';
 import OfflineBanner from '../../components/OfflineBanner';
 import { login } from '../../redux/authSlice';
+import { CALLAPI } from '../../network/RNRestClient';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -65,15 +65,13 @@ export default function LoginScreen(){
                 email: email.trim(),
                 password: password.trim()
             };
-            
-            const response = await axios.post(`${API_URL}${AUTH_ENDPOINTS.LOGIN}`, userData, {
-                timeout: 10000
-            });
 
-            if (response.data?.status === 'ok' && response.data?.data) {
-                const token = response.data.data.token;
-                const user = response.data.data.oldUser;
-                
+            const response = await CALLAPI.post<{status?: string; data?: { token: string; oldUser: any } }>(AUTH_ENDPOINTS.LOGIN, userData);
+
+            if (response?.status === 'ok' && response?.data) {
+                const token = response.data.token;
+                const user = response.data.oldUser;
+
                 await AsyncStorage.setItem('token', token);
                 dispatch(userLogin({
                     id: user._id,
@@ -87,9 +85,7 @@ export default function LoginScreen(){
                 Alert.alert('Login Failed', 'Invalid credentials. Please try again.');
             }
         } catch (error: any) {
-            const errorMessage = error?.response?.data?.message || 
-                                error?.message || 
-                                'Failed to login. Please check your credentials and try again.';
+            const errorMessage = error?.message || 'Failed to login. Please check your credentials and try again.';
             Alert.alert('Error', errorMessage);
             console.error('Login error:', error);
         } finally {

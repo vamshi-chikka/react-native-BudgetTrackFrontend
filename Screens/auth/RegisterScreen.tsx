@@ -2,10 +2,10 @@ import React,{useState} from 'react';
 import {View, Text, StyleSheet,Image, Pressable, Alert,TextInput, TouchableOpacity,ScrollView, StatusBar, KeyboardAvoidingView,Platform, ActivityIndicator} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import axios from 'axios';
 import * as Yup from 'yup';
 import {Formik} from 'formik';
-import { API_TIMEOUT, API_URL, AUTH_ENDPOINTS } from '../../Constants/api';
+import { AUTH_ENDPOINTS } from '../../Constants/api';
+import { CALLAPI } from '../../network/RNRestClient';
 
 export default function RegisterScreen(){
     const navigation = useNavigation();
@@ -29,11 +29,9 @@ export default function RegisterScreen(){
                 password: values.password,
             };
             console.log('Registration data:', registrationData);
-            const response = await axios.post(`${API_URL}${AUTH_ENDPOINTS.REGISTER}`, registrationData, {
-                timeout: API_TIMEOUT
-            });
-            console.log('Registration response:', response.data);
-            if (response.status >= 200 && response.status < 300) {
+            const response = await CALLAPI.post<{status?: string; message?: string; data?: string; error?: string}>(AUTH_ENDPOINTS.REGISTER, registrationData);
+            console.log('Registration response:', response);
+            if (response?.status === 'ok' || response?.message) {
                 Alert.alert('Success', 'Registration successful! Please verify your email.', [
                     {
                         text: 'OK',
@@ -43,20 +41,14 @@ export default function RegisterScreen(){
             } else {
                 Alert.alert(
                     'Registration Failed',
-                    response.data?.message ||
-                    response.data?.data ||
-                    response.data?.error ||
-                    `Request failed (${response.status})`
+                    response?.message ||
+                    response?.data ||
+                    response?.error ||
+                    'Request failed'
                 );
             }
         } catch (error: any) {
-            const errorMessage = error?.response?.data?.message || 
-                                error?.response?.data?.data ||
-                                error?.response?.data?.error ||
-                                (error?.response?.status ? `Request failed (${error.response.status})` : null) ||
-                                (error?.code === 'ECONNABORTED' ? 'The server took too long to respond. Please try again.' : null) ||
-                                error?.message || 
-                                'Failed to register. Please try again.';
+            const errorMessage = error?.message || 'Failed to register. Please try again.';
             Alert.alert('Error', errorMessage);
             console.error('Registration error:', error);
         } finally {

@@ -2,9 +2,9 @@ import {View,Text,StyleSheet,TouchableOpacity,TextInput, Alert} from 'react-nati
 import {SafeAreaView} from 'react-native-safe-area-context';
 import React, {useState} from 'react';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import axios from 'axios';
 import {useNavigation} from '@react-navigation/native';
-import { API_URL, AUTH_ENDPOINTS } from '../../Constants/api';
+import { AUTH_ENDPOINTS } from '../../Constants/api';
+import { CALLAPI } from '../../network/RNRestClient';
 
 
 
@@ -21,23 +21,19 @@ export default function VerifyScreen({route}){
         }
 
         try {
-            const response = await axios.post(`${API_URL}${AUTH_ENDPOINTS.VERIFY}`, {
+            const response = await CALLAPI.post<{status?: string; message?: string}>(AUTH_ENDPOINTS.VERIFY, {
                 email: email.trim().toLowerCase(),
                 otp: trimmedOtp,
             });
 
-            if (response.data?.status === 'ok') {
+            if (response?.status === 'ok') {
                 Alert.alert("Success", "Email verified successfully. You can now login to your account.");
                 navigation.navigate("LoginScreen");
             } else {
-                setError(response.data?.message || 'OTP verification failed');
+                setError(response?.message || 'OTP verification failed');
             }
         } catch (requestError: any) {
-            setError(
-                requestError?.response?.data?.message ||
-                requestError?.message ||
-                'Unable to verify OTP'
-            );
+            setError(requestError?.message || 'Unable to verify OTP');
         }
     }
     return(

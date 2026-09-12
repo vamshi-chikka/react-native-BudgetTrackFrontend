@@ -4,15 +4,15 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
 
 import ExpenseCard from '../components/ExpenseCard';
-import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useFocusEffect} from '@react-navigation/native';
-import {API_URL, TRANSACTION_ENDPOINTS} from '../Constants/api'
+import {TRANSACTION_ENDPOINTS} from '../Constants/api'
 import {NetworkContext} from '../context/NetworkProvider';
 import OfflineBanner from '../components/OfflineBanner';
 import Logout from '../components/Logout';
 import {useSelector} from 'react-redux';
 import TransactionCard from '../components/TransactionCard';
+import { CALLAPI } from '../network/RNRestClient';
 
 export default function Transaction(){
     const {isConnected} = useContext(NetworkContext);
@@ -39,20 +39,11 @@ export default function Transaction(){
                 return;
             }
 
-            const response = await axios.get(
-                `${API_URL}${TRANSACTION_ENDPOINTS.GET_SUMMARY}/?page=${pageNumber}&limit=5`,
-                {
-                    headers: {
-                        authorization: `Bearer ${token}`,
-                        "content-type": "application/json"
-                    },
-                    timeout: 10000
-                }
-            );
+            const response = await CALLAPI.get<{status?: string; data?: { allData: any[]; currentPage: number; totalPages: number } }>(`${TRANSACTION_ENDPOINTS.GET_SUMMARY}/?page=${pageNumber}&limit=5`);
 
-            if (response.data?.status === 'ok' && response.data?.data) {
-                const {allData, currentPage, totalPages} = response.data.data;
-                setAmountDetails(response.data.data);
+            if (response?.status === 'ok' && response?.data) {
+                const {allData, currentPage, totalPages} = response.data;
+                setAmountDetails(response.data);
                 setTotalPages(totalPages);
                 setPage(currentPage);
                 setError('');
@@ -68,9 +59,7 @@ export default function Transaction(){
                 setError('Failed to fetch transactions');
             }
         } catch (error: any) {
-            const errorMessage = error?.response?.data?.message || 
-                                error?.message || 
-                                'Error fetching transactions';
+            const errorMessage = error?.message || 'Error fetching transactions';
             setError(errorMessage);
             console.error('Fetch summary error:', error);
         } finally {
@@ -87,18 +76,9 @@ export default function Transaction(){
                 return;
             }
 
-            const response = await axios.delete(
-                `${API_URL}${TRANSACTION_ENDPOINTS.DELETE_TRANSACTION}/${Id}`,
-                {
-                    headers: {
-                        authorization: `Bearer ${token}`,
-                        "content-type": "application/json"
-                    },
-                    timeout: 10000
-                }
-            );
+            const response = await CALLAPI.delete<{status?: string; message?: string}>(`${TRANSACTION_ENDPOINTS.DELETE_TRANSACTION}/${Id}`);
 
-            if (response.data?.status === 'ok') {
+            if (response?.status === 'ok') {
                 Alert.alert('Success', 'Transaction deleted successfully', [
                     {
                         text: 'OK',
@@ -110,12 +90,10 @@ export default function Transaction(){
                     }
                 ]);
             } else {
-                Alert.alert('Error', response.data?.message || 'Failed to delete transaction');
+                Alert.alert('Error', response?.message || 'Failed to delete transaction');
             }
         } catch (error: any) {
-            const errorMessage = error?.response?.data?.message || 
-                                error?.message || 
-                                'Error deleting transaction';
+            const errorMessage = error?.message || 'Error deleting transaction';
             Alert.alert('Error', errorMessage);
             console.error('Delete transaction error:', error);
         }

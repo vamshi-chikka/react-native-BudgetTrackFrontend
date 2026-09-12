@@ -3,9 +3,9 @@ import React,{useState} from 'react';
 import {StyleSheet,Text, View,TextInput, StatusBar,TouchableOpacity,Alert, ActivityIndicator} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useNavigation} from '@react-navigation/native';
-import axios from 'axios';
-import {API_URL, TRANSACTION_ENDPOINTS} from '../Constants/api';
+import {TRANSACTION_ENDPOINTS} from '../Constants/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { CALLAPI } from '../network/RNRestClient';
 
 export default function AddTransaction(){
     const navigation = useNavigation();
@@ -70,19 +70,9 @@ export default function AddTransaction(){
                 return;
             }
 
-            const response = await axios.post(
-                `${API_URL}${TRANSACTION_ENDPOINTS.ADD_TRANSACTION}`,
-                transactionData,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": 'application/json'
-                    },
-                    timeout: 10000
-                }
-            );
+            const response = await CALLAPI.post<{status?: string; message?: string}>(TRANSACTION_ENDPOINTS.ADD_TRANSACTION, transactionData);
 
-            if (response.data?.status === 'ok') {
+            if (response?.status === 'ok') {
                 Alert.alert('Success', 'Transaction added successfully', [
                     {
                         text: 'OK',
@@ -96,12 +86,10 @@ export default function AddTransaction(){
                     }
                 ]);
             } else {
-                Alert.alert('Error', response.data?.message || 'Failed to add transaction');
+                Alert.alert('Error', response?.message || 'Failed to add transaction');
             }
         } catch (error: any) {
-            const errorMessage = error?.response?.data?.message || 
-                                error?.message || 
-                                'Failed to add transaction. Please try again.';
+            const errorMessage = error?.message || 'Failed to add transaction. Please try again.';
             Alert.alert('Error', errorMessage);
             console.error('Add transaction error:', error);
         } finally {
